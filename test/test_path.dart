@@ -23,8 +23,28 @@ import "dart:io";
 import "package:unittest/unittest.dart";
 import "package:node_shims/path.dart" as path; 
 import "dart:json" as JSON;
+import "../lib/js.dart";
+import "../lib/process.dart" as process;
+
 
 main(){
+  var splitPathRe =
+      new RegExp(r"^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$");
+  
+  splitPath(String filename) {
+    var matches = exec(splitPathRe, filename);
+    return slice(matches, 1);
+  }
+  
+  var controlCharFilename = 'Icon' + new String.fromCharCode(13);
+//  var m = splitPathRe.firstMatch(controlCharFilename);
+//  print(controlCharFilename);
+//  print(m.groups([0,1,2,3]));
+//  print(exec(splitPathRe, controlCharFilename));
+//  print(splitPath(controlCharFilename));
+//  return;
+  
+  
   group('path tests',(){
     var isWindows = Platform.operatingSystem == 'win32';
     print(Directory.current.path);
@@ -61,9 +81,9 @@ main(){
       // POSIX filenames may include control characters
       // c.f. http://www.dwheeler.com/essays/fixing-unix-linux-filenames.html
       if (!isWindows) {
-        var controlCharFilename = 'Icon' + new String.fromCharCode(13);
-        expect(path.basename('/a/b/' + controlCharFilename),
-            equals(controlCharFilename));
+//        var controlCharFilename = 'Icon' + new String.fromCharCode(13);
+//        expect(path.basename('/a/b/' + controlCharFilename),
+//            equals(controlCharFilename));
       }
    });
 
@@ -303,135 +323,150 @@ main(){
 //    });
 
 
-//// path normalize tests
-//      if (isWindows) {
-//        expect(path.normalize('./fixtures///b/../b/c.js'),
-//        'fixtures\\b\\c.js');
-//        expect(path.normalize('/foo/../../../bar'), '\\bar');
-//        expect(path.normalize('a//b//../b'), 'a\\b');
-//        expect(path.normalize('a//b//./c'), 'a\\b\\c');
-//        expect(path.normalize('a//b//.'), 'a\\b');
-//        expect(path.normalize('//server/share/dir/file.ext'),
-//        '\\\\server\\share\\dir\\file.ext');
-//      } else {
-//        expect(path.normalize('./fixtures///b/../b/c.js'),
-//        'fixtures/b/c.js');
-//        expect(path.normalize('/foo/../../../bar'), '/bar');
-//        expect(path.normalize('a//b//../b'), 'a/b');
-//        expect(path.normalize('a//b//./c'), 'a/b/c');
-//        expect(path.normalize('a//b//.'), 'a/b');
-//      }
-//
-//// path.resolve tests
-//      if (isWindows) {
-//        // windows
-//        var resolveTests =
-//            // arguments                                    result
-//            [[['c:/blah\\blah', 'd:/games', 'c:../a'], 'c:\\blah\\a'],
-//             [['c:/ignore', 'd:\\a/b\\c/d', '\\e.exe'], 'd:\\e.exe'],
-//             [['c:/ignore', 'c:/some/file'], 'c:\\some\\file'],
-//             [['d:/ignore', 'd:some/dir//'], 'd:\\ignore\\some\\dir'],
-//             [['.'], process.cwd()],
-//             [['//server/share', '..', 'relative\\'], '\\\\server\\share\\relative'],
-//             [['c:/', '//'], 'c:\\'],
-//             [['c:/', '//dir'], 'c:\\dir'],
-//             [['c:/', '//server/share'], '\\\\server\\share\\'],
-//             [['c:/', '//server//share'], '\\\\server\\share\\'],
-//             [['c:/', '///some//dir'], 'c:\\some\\dir']
-//            ];
-//      } else {
-//        // Posix
-//        var resolveTests =
-//            // arguments                                    result
-//            [[['/var/lib', '../', 'file/'], '/var/file'],
-//             [['/var/lib', '/../', 'file/'], '/file'],
-//             [['a/b/c/', '../../..'], process.cwd()],
-//             [['.'], process.cwd()],
-//             [['/some/dir', '.', '/absolute/'], '/absolute']];
-//      }
-//      var failures = [];
-//      resolveTests.forEach(function(test) {
-//        var actual = path.resolve.apply(path, test[0]);
-//        var expected = test[1];
-//        var message = 'path.resolve(' + test[0].map(JSON.stringify).join(',') + ')' +
-//            '\n  expect=' + JSON.stringify(expected) +
-//            '\n  actual=' + JSON.stringify(actual);
-//        if (actual != expected) failures.push('\n' + message);
-//        // expect(actual, expected, message);
-//      });
-//      expect(failures.length, 0, failures.join(''));
-//
-//// path.isAbsolute tests
-//      if (isWindows) {
-//        expect(path.isAbsolute('//server/file'), true);
-//        expect(path.isAbsolute('\\\\server\\file'), true);
-//        expect(path.isAbsolute('C:/Users/'), true);
-//        expect(path.isAbsolute('C:\\Users\\'), true);
-//        expect(path.isAbsolute('C:cwd/another'), false);
-//        expect(path.isAbsolute('C:cwd\\another'), false);
-//        expect(path.isAbsolute('directory/directory'), false);
-//        expect(path.isAbsolute('directory\\directory'), false);
-//      } else {
-//        expect(path.isAbsolute('/home/foo'), true);
-//        expect(path.isAbsolute('/home/foo/..'), true);
-//        expect(path.isAbsolute('bar/'), false);
-//        expect(path.isAbsolute('./baz'), false);
-//      }
-//
-//// path.relative tests
-//      if (isWindows) {
-//        // windows
-//        var relativeTests =
-//            // arguments                     result
-//            [['c:/blah\\blah', 'd:/games', 'd:\\games'],
-//             ['c:/aaaa/bbbb', 'c:/aaaa', '..'],
-//             ['c:/aaaa/bbbb', 'c:/cccc', '..\\..\\cccc'],
-//             ['c:/aaaa/bbbb', 'c:/aaaa/bbbb', ''],
-//             ['c:/aaaa/bbbb', 'c:/aaaa/cccc', '..\\cccc'],
-//             ['c:/aaaa/', 'c:/aaaa/cccc', 'cccc'],
-//             ['c:/', 'c:\\aaaa\\bbbb', 'aaaa\\bbbb'],
-//             ['c:/aaaa/bbbb', 'd:\\', 'd:\\']];
-//      } else {
-//        // posix
-//        var relativeTests =
-//            // arguments                    result
-//            [['/var/lib', '/var', '..'],
-//             ['/var/lib', '/bin', '../../bin'],
-//             ['/var/lib', '/var/lib', ''],
-//             ['/var/lib', '/var/apache', '../apache'],
-//             ['/var/', '/var/lib', 'lib'],
-//             ['/', '/var/lib', 'var/lib']];
-//      }
-//      var failures = [];
-//      relativeTests.forEach(function(test) {
-//        var actual = path.relative(test[0], test[1]);
-//        var expected = test[2];
-//        var message = 'path.relative(' +
-//            test.slice(0, 2).map(JSON.stringify).join(',') +
-//            ')' +
-//            '\n  expect=' + JSON.stringify(expected) +
-//            '\n  actual=' + JSON.stringify(actual);
-//        if (actual != expected) failures.push('\n' + message);
-//      });
-//      expect(failures.length, 0, failures.join(''));
-//
-//// path.sep tests
-//      if (isWindows) {
-//        // windows
-//        expect(path.sep, equals('\\'));
-//      } else {
-//        // posix
-//        expect(path.sep, '/');
-//      }
-//
-//// path.delimiter tests
-//      if (isWindows) {
-//        // windows
-//        expect(path.delimiter, ';');
-//      } else {
-//        // posix
-//        expect(path.delimiter, ':');
-//      }    
+    test('normalize',(){
+      //// path normalize tests
+      if (isWindows) {
+        expect(path.normalize('./fixtures///b/../b/c.js'),
+        equals('fixtures\\b\\c.js'));
+        expect(path.normalize('/foo/../../../bar'), equals('\\bar'));
+        expect(path.normalize('a//b//../b'), equals('a\\b'));
+        expect(path.normalize('a//b//./c'), equals('a\\b\\c'));
+        expect(path.normalize('a//b//.'), equals('a\\b'));
+        expect(path.normalize('//server/share/dir/file.ext'),
+           equals('\\\\server\\share\\dir\\file.ext'));
+      } else {
+        expect(path.normalize('./fixtures///b/../b/c.js'),
+         equals('fixtures/b/c.js'));
+        expect(path.normalize('/foo/../../../bar'), equals('/bar'));
+        expect(path.normalize('a//b//../b'), equals('a/b'));
+        expect(path.normalize('a//b//./c'), equals('a/b/c'));
+        expect(path.normalize('a//b//.'), equals('a/b'));
+      }
+    });
+
+    test('resolve',(){
+      //// path.resolve tests
+      var resolveTests = [];
+      if (isWindows) {
+        // windows
+          resolveTests =
+            // arguments                                    result
+            [[['c:/blah\\blah', 'd:/games', 'c:../a'], 'c:\\blah\\a'],
+             [['c:/ignore', 'd:\\a/b\\c/d', '\\e.exe'], 'd:\\e.exe'],
+             [['c:/ignore', 'c:/some/file'], 'c:\\some\\file'],
+             [['d:/ignore', 'd:some/dir//'], 'd:\\ignore\\some\\dir'],
+             [['.'], process.cwd()],
+             [['//server/share', '..', 'relative\\'], '\\\\server\\share\\relative'],
+             [['c:/', '//'], 'c:\\'],
+             [['c:/', '//dir'], 'c:\\dir'],
+             [['c:/', '//server/share'], '\\\\server\\share\\'],
+             [['c:/', '//server//share'], '\\\\server\\share\\'],
+             [['c:/', '///some//dir'], 'c:\\some\\dir']
+            ];
+      } else {
+        // Posix
+          resolveTests =
+            // arguments                                    result
+            [[['/var/lib', '../', 'file/'], '/var/file'],
+             [['/var/lib', '/../', 'file/'], '/file'],
+             [['a/b/c/', '../../..'], process.cwd()],
+             [['.'], process.cwd()],
+             [['/some/dir', '.', '/absolute/'], '/absolute']];
+      }
+      failures = [];
+      resolveTests.forEach((test) {
+        var actual = path.resolve(test[0]);
+        var expected = test[1];
+        var message = 'path.resolve(' + test[0].map(JSON.stringify).join(',') + ')' +
+            '\n  expect=' + JSON.stringify(expected) +
+            '\n  actual=' + JSON.stringify(actual);
+        if (actual != expected) failures.push('\n' + message);
+        // expect(actual, expected, message);
+      });
+      expect(failures.length, equals(0), reason:failures.join(''));
+    });
+
+    test('isAbsolute',(){
+      // path.isAbsolute tests
+      if (isWindows) {
+        expect(path.isAbsolute('//server/file'), equals(true));
+        expect(path.isAbsolute('\\\\server\\file'), equals(true));
+        expect(path.isAbsolute('C:/Users/'), equals(true));
+        expect(path.isAbsolute('C:\\Users\\'), equals(true));
+        expect(path.isAbsolute('C:cwd/another'), equals(false));
+        expect(path.isAbsolute('C:cwd\\another'), equals(false));
+        expect(path.isAbsolute('directory/directory'), equals(false));
+        expect(path.isAbsolute('directory\\directory'), equals(false));
+      } else {
+        expect(path.isAbsolute('/home/foo'), equals(true));
+        expect(path.isAbsolute('/home/foo/..'), equals(true));
+        expect(path.isAbsolute('bar/'), equals(false));
+        expect(path.isAbsolute('./baz'), equals(false));
+      }
+    });
+
+    test('relative',(){
+      // path.relative tests
+      var relativeTests = [];
+      if (isWindows) {
+        // windows
+          relativeTests =
+            // arguments                     result
+            [['c:/blah\\blah', 'd:/games', 'd:\\games'],
+             ['c:/aaaa/bbbb', 'c:/aaaa', '..'],
+             ['c:/aaaa/bbbb', 'c:/cccc', '..\\..\\cccc'],
+             ['c:/aaaa/bbbb', 'c:/aaaa/bbbb', ''],
+             ['c:/aaaa/bbbb', 'c:/aaaa/cccc', '..\\cccc'],
+             ['c:/aaaa/', 'c:/aaaa/cccc', 'cccc'],
+             ['c:/', 'c:\\aaaa\\bbbb', 'aaaa\\bbbb'],
+             ['c:/aaaa/bbbb', 'd:\\', 'd:\\']];
+      } else {
+        // posix
+          relativeTests =
+            // arguments                    result
+            [['/var/lib', '/var', '..'],
+             ['/var/lib', '/bin', '../../bin'],
+             ['/var/lib', '/var/lib', ''],
+             ['/var/lib', '/var/apache', '../apache'],
+             ['/var/', '/var/lib', 'lib'],
+             ['/', '/var/lib', 'var/lib']];
+      }
+      failures = [];
+      relativeTests.forEach((test) {
+        var actual = path.relative(test[0], test[1]);
+        var expected = test[2];
+        var message = 'path.relative(' +
+            slice(test, 0, 2).map(JSON.stringify).join(',') +
+            ')' +
+            '\n  expect=' + JSON.stringify(expected) +
+            '\n  actual=' + JSON.stringify(actual);
+        if (actual != expected) failures.push('\n' + message);
+      });
+      expect(failures.length, equals(0), reason:failures.join(''));
+    });
+
+    test('sep',(){
+      // path.sep tests
+      if (isWindows) {
+        // windows
+        expect(path.sep, equals('\\'));
+      } else {
+        // posix
+        expect(path.sep, '/');
+      }
+    }); 
+    
+    test('delimiter',(){
+      // path.delimiter tests
+      if (isWindows) {
+        // windows
+        expect(path.delimiter, ';');
+      } else {
+        // posix
+        expect(path.delimiter, ':');
+      }    
+    });
+
   });  
 }
 
