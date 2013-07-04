@@ -42,7 +42,6 @@ Solve the relative path from `from` to `to`.
 ```dart
 String relative(String from, String to)
 ```
-```
 
 Return the directory name of a path. Similar to the Unix `dirname` command.
 ```dart
@@ -62,6 +61,7 @@ String extname(String path)
 Check if it's an absolute path.
 ```dart
 bool isAbsolute(String path)
+```
 
 Check if a file exists.
 ```dart
