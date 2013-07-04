@@ -33,7 +33,7 @@ import "js.dart";
 import "utils.dart";
 import "process.dart" as process;
 
-normalizeArray(Iterable<String> paths, bool allowAboveRoot) {
+List normalizeArray(Iterable<String> paths, bool allowAboveRoot) {
   // if the path tries to go above the root, `up` ends up > 0
   var parts = paths.toList();
   var up = 0;
@@ -366,7 +366,7 @@ _PathExports _factory(){
         // Skip empty and invalid entries
         if (path is! String) {
           throw new TypeError(); //'Arguments to path.resolve must be strings'
-        } else if (path == null || path.isEmpty) {
+        } else if (path == null || path == '') {
           continue;
         }
   
@@ -379,7 +379,7 @@ _PathExports _factory(){
   
       // Normalize the path
       resolvedPath = normalizeArray(
-          resolvedPath.split('/').where((p) => p != null && !p.isEmpty), 
+          resolvedPath.split('/').where((p) => p != null && p != ''), 
           !resolvedAbsolute).join('/');
   
       return or(((resolvedAbsolute ? '/' : '') + resolvedPath), '.');
@@ -392,12 +392,12 @@ _PathExports _factory(){
       var trailingSlash = path.endsWith('/');
   
       // Normalize the path
-      path = normalizeArray(path.split('/').where((p) => p != null && !p.isEmpty), !isAbsolute).join('/');
+      path = normalizeArray(path.split('/').where((p) => p != null && p != ''), !isAbsolute).join('/');
   
-      if ((path == null || path.isEmpty) && !isAbsolute) {
+      if ((path == null || path == '') && !isAbsolute) {
         path = '.';
       }
-      if ((path != null && !path.isEmpty) && trailingSlash) {
+      if ((path != null && path != '') && trailingSlash) {
         path += '/';
       }
   
@@ -415,7 +415,7 @@ _PathExports _factory(){
         if (p is! String) {
           throw new TypeError(); //'Arguments to path.join must be strings'
         }
-        return p != null && !p.isEmpty;
+        return p != null && p != '';
       }).toList();
       int index = 0;
       return exports.normalize(paths.join('/'));
@@ -476,7 +476,7 @@ String dirname(String path) {
   var root = result[0];
   var dir = result[1];
 
-  if ((root == null || root.isEmpty) && (dir == null || dir.isEmpty)) {
+  if ((root == null || root == '') && (dir == null || dir == '')) {
     // No dirname whatsoever
     return '.';
   }

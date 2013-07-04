@@ -1,21 +1,17 @@
 library js;
 
-escapeHtml(html) => "$html"
-  .replaceAll("&", '&amp;')
-  .replaceAll("<", '&lt;')
-  .replaceAll(">", '&gt;')
-  .replaceAll('"', '&quot;');
+/// JS Patterns
 
-List<String> exec(RegExp regex, String str){
-  var m = regex.firstMatch(str);
-  if (m == null) return null;
-  
-  var groups = [];
-  for (var i=0; i<=m.groupCount; i++)
-    groups.add(i);
+or(value, defaultValue) =>
+  falsey(value) 
+    ? defaultValue is Function ? defaultValue() : defaultValue 
+    : value; 
 
-  return m.groups(groups);
-}
+bool falsey(value) => value == null || value == false || value == '' || value == 0 || value == double.NAN;
+
+bool truthy(value) => !falsey(value);
+
+/// Arrays
 
 List splice(List list, int index, [num howMany=0, dynamic elements]){
   var endIndex = index + howMany.truncate();
@@ -24,9 +20,6 @@ List splice(List list, int index, [num howMany=0, dynamic elements]){
     list.insertAll(index, elements is List ? elements : [elements]);
   return list;
 }
-
-List slice(List list, int begin, [int end]) =>
-  list.getRange(begin, end == null ? list.length : end < 0 ? list.length + end : end).toList();
 
 List concat(List lists) {
   var ret = [];
@@ -37,4 +30,120 @@ List concat(List lists) {
       ret.add(item);
   }
   return ret;
+}
+
+dynamic pop(List list) => list.removeLast();
+
+int push(List list, item){
+  list.add(item);
+  return list.length;
+}
+
+List reverse(List list) => list = list.reversed.toList();
+
+dynamic shift(List list) => list.removeAt(0);
+
+int unshift(List list, item){
+  list.insert(0, item);
+  return list.length;
+}
+
+List slice(List list, int begin, [int end]) =>
+  list.getRange(begin, end == null ? list.length : end < 0 ? list.length + end : end).toList();
+
+bool every(List list, fn(e)) => list.every((x) => truthy(fn(x)));
+
+bool some(List list, fn(e)) => list.any((x) => truthy(fn(x)));
+
+List filter(List list, fn(e)) => list.where((x) => truthy(fn(x))).toList();
+
+dynamic reduce(List list, fn(prev, curr, int index, List list), [initialValue]){
+  var index = 0; 
+  var value; 
+  var isValueSet = false;
+  if (1 < list.length) {
+    value = initialValue;
+    isValueSet = true;
+  }
+  for ( ; list.length > index; ++index) {
+    if (isValueSet) {
+      value = fn(value, list[index], index, list);
+    } else {
+      value = list[index];
+      isValueSet = true;
+    }
+  }
+  if (!isValueSet)
+    throw new TypeError(); //'Reduce of empty array with no initial value'
+ 
+  return value;
+}
+
+dynamic reduceRight(List list, fn(prev, curr, int index, List list), [initialValue]){
+  var length = list.length; 
+  var index = length - 1;
+  var value; 
+  var isValueSet = false;
+  if (1 < list.length) {
+    value = initialValue;
+    isValueSet = true;
+  }
+  for ( ; -1 < index; --index) {
+    if (isValueSet) {
+      value = fn(value, list[index], index, list);
+    } else {
+      value = list[index];
+      isValueSet = true;
+    }
+  }
+  if (!isValueSet) {
+    throw new TypeError(); //'Reduce of empty array with no initial value'
+  }
+  return value;
+}
+
+/// Strings
+
+String charAt(String str, int atPos) => str.substring(atPos, 1);
+
+int charCodeAt(String str, int atPos) => str.codeUnitAt(atPos);
+
+String quote(String str) => '"$str"';
+
+String replace(String str, pattern) => str.replaceAll(str, pattern);
+
+int search(String str, RegExp pattern) => str.indexOf(pattern);
+  
+String substr(String str, int start, [int length=null]) {
+  if (start < 0) start = str.length + start;
+  if (start < 0) start = 0;
+  if (start > str.length) start = str.length;
+  var end = length == null 
+    ? str.length 
+    : start + length > str.length ? str.length : start + length; 
+  return str.substring(start, end);
+}
+
+String trimLeft(String str) => str.replaceAll(new RegExp(r'^\s+'), '');
+
+String trimRight(String str) => str.replaceAll(new RegExp(r'\s+$'), '');
+
+String escapeHtml(String html) => html
+  .replaceAll("&", '&amp;')
+  .replaceAll("<", '&lt;')
+  .replaceAll(">", '&gt;')
+  .replaceAll('"', '&quot;');
+
+
+/// RegEx
+
+List<String> exec(RegExp regex, String str){
+  var m = regex.firstMatch(str);
+  if (m == null) return null;
+  
+  var groups = [];
+  for (var i=0; i<=m.groupCount; i++)
+    groups.add(i);
+
+  return m.groups(groups);
 }

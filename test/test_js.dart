@@ -50,6 +50,16 @@ main(){
       expect(citrus, equals(["Orange","Lemon"]));          
     });
     
+    test('substr',(){
+      var str = "abcdefghij";
+      expect(substr(str, 1,2), equals("bc"));
+      expect(substr(str, -3,2), equals("hi"));
+      expect(substr(str, -3), equals("hij"));
+      expect(substr(str, 1), equals("bcdefghij"));
+      expect(substr(str, -20,2), equals("ab"));
+      expect(substr(str, 20,2), equals(""));
+    });
+    
   });
   
 }
