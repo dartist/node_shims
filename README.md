@@ -4,6 +4,13 @@ Node and JavaScript API Shims
 Common node and js utils to help in porting of node.js and javascript libs to dart.
 Behavior of libs should match the js implementation as closely as dart allows.
 
+## [Installing via Pub](http://pub.dartlang.org/packages/node_shims)	
+
+Add this to your package's pubspec.yaml file:
+
+	dependencies:
+	  node_shims: 0.1.0
+
 ## Public API
 
 ## [Path](https://github.com/dartist/node_shims/blob/master/lib/path.dart)
@@ -298,6 +305,45 @@ Exit the Dart VM process immediately with the given `code`.
 void exit([int code=0])
 ```
 
+## [Utils](https://github.com/dartist/node_shims/blob/master/lib/utils.dart)
+
+Useful helper utils extracted from the [101 LINQ Samples](https://github.com/dartist/101LinqSamples).
+
+### Usage:
+
+	import "package:node_shims/utils.dart";
+
+Order a sequance by comparators or expressions.
+[docs](https://github.com/dartist/101LinqSamples#linq---ordering-operators)
+```dart
+order(List seq, {Comparator by, List<Comparator> byAll, on(x), List<Function> onAll})
+```
+
+A case-insensitive comparer that can be used in ordering and grouping functions.
+```dart
+caseInsensitiveComparer(a,b) => a.toUpperCase().compareTo(b.toUpperCase());
+```
+
+Group a sequance by comparators or expressions.
+[docs](https://github.com/dartist/101LinqSamples#linq---grouping-operators)
+```dart
+List<Group> group(Iterable seq, {by(x):null, Comparator matchWith:null, valuesAs(x):null})
+```
+
+Capture an expression and invoke it in the supplied function.
+```dart
+wrap(value, fn(x)) => fn(value);
+```
+
+Trim the start of a string if it matches the specified string.
+```dart
+String trimStart(String str, String start)
+```
+
+Trim the end of a string if it matches the specified string.
+```dart
+String trimEnd(String str, String end)
+```
 
 -------
 
