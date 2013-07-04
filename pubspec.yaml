@@ -1,5 +1,8 @@
 name: node_shims
-description: A sample command-line application
+version: 0.1.0
+author: Demis Bellot<demis.bellot@gmail.com>
+description: Common node and js utils to help in porting of node.js and javascript libs to dart.
+homepage: https://github.com/dartist/node_shims/
 dependencies:
   unittest: any
 

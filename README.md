@@ -255,12 +255,12 @@ String escapeHtml(String html)
 
 Returns the current working directory of the process.
 ```dart
-cwd() => Directory.current.path;
+String cwd()
 ```
 
 An object containing the user environment.
 ```dart
-Map<String,String> env = Platform.environment;
+Map<String,String> env
 ```
 
 A Writable Stream to stdout.
@@ -291,16 +291,6 @@ String get execPath
 Changes the current working directory of the process or throws an exception if that fails.
 ```dart
 void chdir(String directory)
-```
-
-Returns the current working directory of the process.
-```dart
-String cwd()
-```
-
-An object containing the user environment. 
-```dart
-Map<String,String> get env
 ```
 
 Exit the Dart VM process immediately with the given `code`.
