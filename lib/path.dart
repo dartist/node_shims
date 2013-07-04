@@ -136,7 +136,7 @@ _PathExports _factory(){
         if (i >= 0) {
           path = arguments[i];
         } else if (!resolvedDevice) {
-          path = process.path;
+          path = process.cwd();
         } else {
           // Windows has the concept of drive-specific current working
           // directories. If we've resolved a drive letter but not yet an
