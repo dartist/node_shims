@@ -90,7 +90,7 @@ _stringListFn splitPath = _exports.splitPath;
 _PathExports _factory(){
   var exports = new _PathExports();
 
-  var isWindows = Platform.operatingSystem == 'win32';
+  var isWindows = Platform.operatingSystem == 'win32' || Platform.operatingSystem=='windows';
   
   if (isWindows) {
     // Regex to split a windows path into three parts: [*, device, slash,
