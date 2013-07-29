@@ -207,7 +207,7 @@ _PathExports _factory(){
     exports.normalize = (String path) {
       var result = exec(splitDeviceRe,path);
       var device = or(result[1], '');
-      var isUnc = device != null && device.length>1 && device.substring(1,1) != ':';
+      var isUnc = device != null && device.length>1 && device[1] != ':';
       var isAbsolute = exports.isAbsolute(path);
       var tail = result[3];
       var trailingSlash = new RegExp(r"[\\\/]$").hasMatch(tail);
@@ -222,10 +222,10 @@ _PathExports _factory(){
         return p != null;
       }), !isAbsolute).join('\\');
   
-      if (!tail && !isAbsolute) {
+      if (tail==null && !isAbsolute) {
         tail = '.';
       }
-      if (tail && trailingSlash) {
+      if (tail!=null && trailingSlash) {
         tail += '\\';
       }
   
@@ -242,7 +242,7 @@ _PathExports _factory(){
     exports.isAbsolute = (path) {
       var result = exec(splitDeviceRe,path),
           device = result[1]!=null ? result[1] : '',
-          isUnc = device!=null && device.length>1 && device.charAt(1) != ':';
+          isUnc = device!=null && device.length>1 && device[1] != ':';
       // UNC paths are always absolute
       return result[2]!=null || isUnc;
     };
