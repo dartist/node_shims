@@ -213,7 +213,7 @@ _PathExports _factory(){
       var trailingSlash = new RegExp(r"[\\\/]$").hasMatch(tail);
   
       // If device is a drive letter, we'll normalize to lower case.
-      if (device != null && device.substring(1,1) == ':') {
+      if (device != null && device.length>1 && device.substring(1,1) == ':') {
         device = device[0].toLowerCase() + device.substring(1);
       }
   
