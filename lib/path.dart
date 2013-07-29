@@ -207,7 +207,7 @@ _PathExports _factory(){
     exports.normalize = (String path) {
       var result = exec(splitDeviceRe,path);
       var device = or(result[1], '');
-      var isUnc = device != null && device.substring(1,1) != ':';
+      var isUnc = device != null && device.length>1 && device.substring(1,1) != ':';
       var isAbsolute = exports.isAbsolute(path);
       var tail = result[3];
       var trailingSlash = new RegExp(r"[\\\/]$").hasMatch(tail);
@@ -256,7 +256,7 @@ _PathExports _factory(){
         return true;
       }
   
-      var paths = arguments.where((x) => f(x));
+      var paths = arguments.where((x) => f(x)).toList();
       var joined = paths.join('\\');
   
       // Make sure that the joined path doesn't start with two slashes, because
