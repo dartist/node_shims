@@ -241,10 +241,10 @@ _PathExports _factory(){
     // windows version
     exports.isAbsolute = (path) {
       var result = exec(splitDeviceRe,path),
-          device = result[1] || '',
-          isUnc = device && device.charAt(1) != ':';
+          device = result[1]!=null ? result[1] : '',
+          isUnc = device && device.length>1 && device.charAt(1) != ':';
       // UNC paths are always absolute
-      return !!result[2] || isUnc;
+      return result[2]!=null || isUnc;
     };
   
     // windows version
