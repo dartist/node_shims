@@ -158,7 +158,7 @@ _PathExports _factory(){
           continue;
         }
   
-        var result = splitDeviceRe.exec(path);
+        var result = exec(splitDeviceRe,path);
         var device = or(result[1], '');
         isUnc = device && device.substring(1,1) != ':';
         var isAbsolute = exports.isAbsolute(path);
@@ -205,7 +205,7 @@ _PathExports _factory(){
   
     // windows version
     exports.normalize = (String path) {
-      var result = splitDeviceRe.exec(path);
+      var result = exec(splitDeviceRe,path);
       var device = or(result[1], '');
       var isUnc = device != null && device.substring(1,1) != ':';
       var isAbsolute = exports.isAbsolute(path);
@@ -240,7 +240,7 @@ _PathExports _factory(){
   
     // windows version
     exports.isAbsolute = (path) {
-      var result = splitDeviceRe.exec(path),
+      var result = exec(splitDeviceRe,path),
           device = result[1] || '',
           isUnc = device && device.charAt(1) != ':';
       // UNC paths are always absolute
