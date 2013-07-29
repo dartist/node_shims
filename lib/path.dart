@@ -253,7 +253,7 @@ _PathExports _factory(){
         if (p is! String) {
           throw new TypeError(); //'Arguments to path.join must be strings'
         }
-        return p;
+        return true;
       }
   
       var paths = arguments.where((x) => f(x));
