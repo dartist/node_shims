@@ -352,5 +352,7 @@ Pull requests for missing js or node.js utils welcome.
 ### Contributors
 
   - [mythz](https://github.com/mythz) (Demis Bellot)
+  - [MaxHorstmann](https://github.com/MaxHorstmann) (Max Horstmann)
+  
  
   
