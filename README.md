@@ -9,7 +9,7 @@ Behavior of libs should match the js implementation as closely as dart allows.
 Add this to your package's pubspec.yaml file:
 
 	dependencies:
-	  node_shims: 0.1.2
+	  node_shims: 0.1.3
 
 ## Public API
 

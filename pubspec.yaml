@@ -1,5 +1,5 @@
 name: node_shims
-version: 0.1.2
+version: 0.1.3
 author: Demis Bellot <demis.bellot@gmail.com>
 description: Common node and js utils to help in porting of node.js and javascript libs to dart.
 homepage: https://github.com/dartist/node_shims/
