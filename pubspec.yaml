@@ -6,7 +6,7 @@ homepage: https://github.com/dartist/node_shims/
 environment:
   sdk: '>=1.20.1 <=2.1.0'
 dependencies:
-  unittest: any
+  test: any
 
 #dependencies:
 #  unittest: any
