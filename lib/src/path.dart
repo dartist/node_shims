@@ -2,7 +2,7 @@
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
+// 'Software'), to deal in the Software without restriction, including
 // without limitation the rights to use, copy, modify, merge, publish,
 // distribute, sublicense, and/or sell copies of the Software, and to permit
 // persons to whom the Software is furnished to do so, subject to the
@@ -11,7 +11,7 @@
 // The above copyright notice and this permission notice shall be included
 // in all copies or substantial portions of the Software.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
 // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -26,12 +26,11 @@
 
 library path;
 
-import "dart:io";
-import "dart:math" as Math;
+import 'dart:io';
+import 'dart:math' as Math;
 
-import "js.dart";
-import "utils.dart";
-import "process.dart" as process;
+import 'js.dart';
+import 'process.dart' as process;
 
 List normalizeArray(Iterable<String> paths, bool allowAboveRoot) {
   // if the path tries to go above the root, `up` ends up > 0
@@ -60,11 +59,11 @@ List normalizeArray(Iterable<String> paths, bool allowAboveRoot) {
   return parts;
 }
 
-typedef String _listStringFn(List arguments);
-typedef List<String> _stringListFn(String path);
-typedef String _stringFn(String path);
-typedef String _string2Fn(String path1, String path2);
-typedef bool _stringBoolFn(String path);
+typedef _listStringFn = String Function(List arguments);
+typedef _stringListFn = List<String> Function(String path);
+typedef _stringFn = String Function(String path);
+typedef _string2Fn = String Function(String path1, String path2);
+typedef _stringBoolFn = bool Function(String path);
 
 class _PathExports {
   String sep;
@@ -87,24 +86,25 @@ _stringBoolFn isAbsolute = _exports.isAbsolute;
 _string2Fn relative = _exports.relative;
 _stringListFn splitPath = _exports.splitPath;
 
-_PathExports _factory(){
-  var exports = new _PathExports();
+_PathExports _factory() {
+  var exports = _PathExports();
 
-  var isWindows = Platform.operatingSystem == 'win32' || Platform.operatingSystem=='windows';
-  
+  var isWindows = Platform.operatingSystem == 'win32' ||
+      Platform.operatingSystem == 'windows';
+
   if (isWindows) {
     // Regex to split a windows path into three parts: [*, device, slash,
     // tail] windows-only
-    var splitDeviceRe =
-      new RegExp(r"^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$");
-  
+    var splitDeviceRe = RegExp(
+        r'^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$');
+
     // Regex to split the tail part of the above into [*, dir, basename, ext]
-    var splitTailRe =
-      new RegExp(r"^([\s\S]*?)((?:\.{1,2}|[^\\\/]+?|)(\.[^.\/\\]*|))(?:[\\\/]*)$");
-  
+    var splitTailRe = RegExp(
+        r'^([\s\S]*?)((?:\.{1,2}|[^\\\/]+?|)(\.[^.\/\\]*|))(?:[\\\/]*)$');
+
     // Function to split a filename into [root, dir, basename, ext]
     // windows version
-    exports.splitPath = (String filename){
+    exports.splitPath = (String filename) {
       // Separate device+slash from tail
       var result = exec(splitDeviceRe, filename);
       var device = or(result[1], '') + or(result[2], '');
@@ -116,26 +116,29 @@ _PathExports _factory(){
       var ext = result2[3];
       return [device, dir, basename, ext];
     };
-  
-    normalizeUNCRoot(String device) {
-      return '\\\\' + device
-        .replaceFirst(new RegExp(r"^[\\\/]+"), '')
-        .replaceAll(new RegExp(r"[\\\/]+"), '\\');
-    };
-  
+
+    String normalizeUNCRoot(String device) {
+      return '\\\\' +
+          device
+              .replaceFirst(RegExp(r'^[\\\/]+'), '')
+              .replaceAll(RegExp(r'[\\\/]+'), '\\');
+    }
+
+    ;
+
     // path.resolve([from ...], to)
     // windows version
     exports.resolve = (List arguments) {
       var resolvedDevice = '';
       var resolvedTail = '';
       var resolvedAbsolute = false;
-      bool isUnc = false;
-  
+      var isUnc = false;
+
       for (var i = arguments.length - 1; i >= -1; i--) {
         var path;
         if (i >= 0) {
           path = arguments[i];
-        } else if (!resolvedDevice) {
+        } else if (resolvedDevice == '') {
           path = process.cwd();
         } else {
           // Windows has the concept of drive-specific current working
@@ -145,120 +148,130 @@ _PathExports _factory(){
           path = process.env['=' + resolvedDevice];
           // Verify that a drive-local cwd was found and that it actually points
           // to our drive. If not, default to the drive's root.
-          if (path == null || path.substring(0, 3).toLowerCase() !=
-              resolvedDevice.toLowerCase() + '\\') {
+          if (path == null ||
+              path.substring(0, 3).toLowerCase() !=
+                  resolvedDevice.toLowerCase() + '\\') {
             path = resolvedDevice + '\\';
           }
         }
-  
+
         // Skip empty and invalid entries
         if (path is! String) {
-          throw new TypeError(); //'Arguments to path.resolve must be strings'
+          throw TypeError(); //'Arguments to path.resolve must be strings'
         } else if (!path) {
           continue;
         }
-  
-        var result = exec(splitDeviceRe,path);
+
+        var result = exec(splitDeviceRe, path);
         var device = or(result[1], '');
-        isUnc = device && device.substring(1,1) != ':';
+        isUnc = device && device.substring(1, 1) != ':';
         var isAbsolute = exports.isAbsolute(path);
         var tail = result[3];
-  
+
         if (device &&
-            resolvedDevice &&
+            resolvedDevice != '' &&
             device.toLowerCase() != resolvedDevice.toLowerCase()) {
           // This path points to another device so it is not applicable
           continue;
         }
-  
-        if (!resolvedDevice) {
+
+        if (resolvedDevice == '') {
           resolvedDevice = device;
         }
         if (!resolvedAbsolute) {
           resolvedTail = tail + '\\' + resolvedTail;
           resolvedAbsolute = isAbsolute;
         }
-  
-        if (resolvedDevice && resolvedAbsolute) {
+
+        if (resolvedDevice != '' && resolvedAbsolute) {
           break;
         }
       }
-  
+
       // Convert slashes to backslashes when `resolvedDevice` points to an UNC
       // root. Also squash multiple slashes into a single one where appropriate.
       if (isUnc) {
         resolvedDevice = normalizeUNCRoot(resolvedDevice);
       }
-  
+
       // At this point the path should be resolved to a full absolute path,
       // but handle relative paths to be safe (might happen when process.cwd()
       // fails)
-  
+
       // Normalize the tail path
-      f(p) => p != null && p != false;
-  
-      resolvedTail = normalizeArray(resolvedTail.split(new RegExp(r"[\\\/]+")).where(f),
-                                    !resolvedAbsolute).join('\\');
-  
-      return or((resolvedDevice + (resolvedAbsolute ? '\\' : '') + resolvedTail), '.');
+      bool f(p) => p != null && p != false;
+
+      resolvedTail = normalizeArray(
+              resolvedTail.split(RegExp(r'[\\\/]+')).where(f),
+              !resolvedAbsolute)
+          .join('\\');
+
+      return or(
+          (resolvedDevice + (resolvedAbsolute ? '\\' : '') + resolvedTail),
+          '.');
     };
-  
+
     // windows version
     exports.normalize = (String path) {
-      var result = exec(splitDeviceRe,path);
+      var result = exec(splitDeviceRe, path);
       var device = or(result[1], '');
-      var isUnc = device != null && device.length>1 && device[1] != ':';
+      var isUnc = device != null && device.length > 1 && device[1] != ':';
       var isAbsolute = exports.isAbsolute(path);
       var tail = result[3];
-      var trailingSlash = new RegExp(r"[\\\/]$").hasMatch(tail);
-  
+      var trailingSlash = RegExp(r'[\\\/]$').hasMatch(tail);
+
       // If device is a drive letter, we'll normalize to lower case.
-      if (device != null && device.length>1 && device.substring(1,1) == ':') {
+      if (device != null &&
+          device.length > 1 &&
+          device.substring(1, 1) == ':') {
         device = device[0].toLowerCase() + device.substring(1);
       }
-  
+
       // Normalize the tail path
-      tail = normalizeArray(tail.split(new RegExp(r"[\\\/]+")).where((p) {
-        return p != null;
-      }), !isAbsolute).join('\\');
-  
-      if (tail==null && !isAbsolute) {
+      tail = normalizeArray(
+              tail.split(RegExp(r'[\\\/]+')).where((p) {
+                return p != null;
+              }),
+              !isAbsolute)
+          .join('\\');
+
+      if (tail == null && !isAbsolute) {
         tail = '.';
       }
-      if (tail!=null && trailingSlash) {
+      if (tail != null && trailingSlash) {
         tail += '\\';
       }
-  
+
       // Convert slashes to backslashes when `device` points to an UNC root.
       // Also squash multiple slashes into a single one where appropriate.
       if (isUnc) {
         device = normalizeUNCRoot(device);
       }
-  
+
       return device + (isAbsolute ? '\\' : '') + tail;
     };
-  
+
     // windows version
     exports.isAbsolute = (path) {
-      var result = exec(splitDeviceRe,path),
-          device = result[1]!=null ? result[1] : '',
-          isUnc = device!=null && device.length>1 && device[1] != ':';
+      var result = exec(splitDeviceRe, path),
+          device = result[1] ?? '',
+          isUnc = device != null && device.length > 1 && device[1] != ':';
       // UNC paths are always absolute
-      return result[2]!=null || isUnc;
+      return result[2] != null || isUnc;
     };
-  
+
     // windows version
     exports.join = (List arguments) {
-       f(p) {
+      bool f(p) {
         if (p is! String) {
-          throw new TypeError(); //'Arguments to path.join must be strings'
+          throw TypeError(); //'Arguments to path.join must be strings'
         }
         return true;
       }
-  
+
       var paths = arguments.where((x) => f(x)).toList();
       var joined = paths.join('\\');
-  
+
       // Make sure that the joined path doesn't start with two slashes, because
       // normalize() will mistake it for an UNC path then.
       //
@@ -272,13 +285,13 @@ _PathExports _factory(){
       // This means that the user can use join to construct UNC paths from
       // a server name and a share name; for example:
       //   path.join('//server', 'share') -> '\\\\server\\share\')
-      if (!new RegExp(r"^[\\\/]{2}[^\\\/]").hasMatch(paths[0])) {
-        joined = joined.replaceFirst(new RegExp(r"^[\\\/]{2,}"), '\\');
+      if (!RegExp(r'^[\\\/]{2}[^\\\/]').hasMatch(paths[0])) {
+        joined = joined.replaceFirst(RegExp(r'^[\\\/]{2,}'), '\\');
       }
-  
+
       return exports.normalize(joined);
     };
-  
+
     // path.relative(from, to)
     // it will solve the relative path from 'from' to 'to', for instance:
     // from = 'C:\\orandea\\test\\aaa'
@@ -286,34 +299,37 @@ _PathExports _factory(){
     // The output of the function should be: '..\\..\\impl\\bbb'
     // windows version
     exports.relative = (String from, String to) {
-      from = exports.resolve(from);
-      to = exports.resolve(to);
-  
+      List fromList, toList;
+      fromList.add(from);
+      toList.add(to);
+      from = exports.resolve(fromList);
+      to = exports.resolve(toList);
+
       // windows is not case sensitive
       var lowerFrom = from.toLowerCase();
       var lowerTo = to.toLowerCase();
-  
-       trim(arr) {
+
+      dynamic trim(arr) {
         var start = 0;
         for (; start < arr.length; start++) {
           if (arr[start] != '') break;
         }
-  
+
         var end = arr.length - 1;
         for (; end >= 0; end--) {
           if (arr[end] != '') break;
         }
-  
+
         if (start > end) return [];
         return arr.slice(start, end - start + 1);
       }
-  
+
       var toParts = trim(to.split('\\'));
-  
+
       var lowerFromParts = trim(lowerFrom.split('\\'));
       var lowerToParts = trim(lowerTo.split('\\'));
-  
-      var length = Math.min(lowerFromParts.length, lowerToParts.length);
+
+      var length = Math.min<int>(lowerFromParts.length, lowerToParts.length);
       var samePartsLength = length;
       for (var i = 0; i < length; i++) {
         if (lowerFromParts[i] != lowerToParts[i]) {
@@ -321,132 +337,129 @@ _PathExports _factory(){
           break;
         }
       }
-  
+
       if (samePartsLength == 0) {
         return to;
       }
-  
+
       var outputParts = [];
       for (var i = samePartsLength; i < lowerFromParts.length; i++) {
-        outputParts.push('..');
+        push(outputParts, '..');
       }
-  
+
       outputParts = concat([outputParts, slice(toParts, samePartsLength)]);
-  
+
       return outputParts.join('\\');
     };
-  
+
     exports.sep = '\\';
     exports.delimiter = ';';
-  
   } else /* posix */ {
-  
     // Split a filename into [root, dir, basename, ext], unix version
     // 'root' is just a slash, or nothing.
-    var splitPathRe =
-        new RegExp(r"^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$");
-    
+    var splitPathRe = RegExp(
+        r'^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$');
+
     exports.splitPath = (String filename) {
       var matches = exec(splitPathRe, filename);
       //bug: https://code.google.com/p/dart/issues/detail?id=11674&thanks=11674&ts=1372835984
-      if (matches.length == 5 && matches[3] == matches[4])
-        matches[4] = '';
+      if (matches.length == 5 && matches[3] == matches[4]) matches[4] = '';
       return slice(matches, 1);
     };
-  
+
     // path.resolve([from ...], to)
     // posix version
     exports.resolve = (List arguments) {
-      var resolvedPath = '',
-          resolvedAbsolute = false;
-  
+      var resolvedPath = '', resolvedAbsolute = false;
+
       for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
         var path = (i >= 0) ? arguments[i] : process.cwd();
-  
+
         // Skip empty and invalid entries
         if (path is! String) {
-          throw new TypeError(); //'Arguments to path.resolve must be strings'
+          throw TypeError(); //'Arguments to path.resolve must be strings'
         } else if (path == null || path == '') {
           continue;
         }
-  
+
         resolvedPath = path + '/' + resolvedPath;
         resolvedAbsolute = path.startsWith('/');
       }
-  
+
       // At this point the path should be resolved to a full absolute path, but
       // handle relative paths to be safe (might happen when process.cwd() fails)
-  
+
       // Normalize the path
       resolvedPath = normalizeArray(
-          resolvedPath.split('/').where((p) => p != null && p != ''), 
-          !resolvedAbsolute).join('/');
-  
+              resolvedPath.split('/').where((p) => p != null && p != ''),
+              !resolvedAbsolute)
+          .join('/');
+
       return or(((resolvedAbsolute ? '/' : '') + resolvedPath), '.');
     };
-  
+
     // path.normalize(path)
     // posix version
     exports.normalize = (String path) {
       var isAbsolute = exports.isAbsolute(path);
       var trailingSlash = path.endsWith('/');
-  
+
       // Normalize the path
-      path = normalizeArray(path.split('/').where((p) => p != null && p != ''), !isAbsolute).join('/');
-  
+      path = normalizeArray(
+              path.split('/').where((p) => p != null && p != ''), !isAbsolute)
+          .join('/');
+
       if ((path == null || path == '') && !isAbsolute) {
         path = '.';
       }
       if ((path != null && path != '') && trailingSlash) {
         path += '/';
       }
-  
+
       return (isAbsolute ? '/' : '') + path;
     };
-  
+
     // posix version
     exports.isAbsolute = (String path) {
       return path != null && path.startsWith('/');
     };
-  
+
     // posix version
     exports.join = (List arguments) {
       var paths = arguments.where((p) {
         if (p is! String) {
-          throw new TypeError(); //'Arguments to path.join must be strings'
+          throw TypeError(); //'Arguments to path.join must be strings'
         }
         return p != null && p != '';
       }).toList();
-      int index = 0;
       return exports.normalize(paths.join('/'));
     };
-  
-  
+
     // path.relative(from, to)
     // posix version
     exports.relative = (String from, String to) {
       from = exports.resolve([from]).substring(1);
       to = exports.resolve([to]).substring(1);
-  
-       trim(arr) {
+
+      dynamic trim(arr) {
         var start = 0;
         for (; start < arr.length; start++) {
           if (arr[start] != '') break;
         }
-  
+
         var end = arr.length - 1;
         for (; end >= 0; end--) {
           if (arr[end] != '') break;
         }
-  
+
         if (start > end) return [];
         return slice(arr, start, end - start + 1);
       }
-  
+
       var fromParts = trim(from.split('/'));
       var toParts = trim(to.split('/'));
-  
-      var length = Math.min(fromParts.length, toParts.length);
+
+      var length = Math.min<int>(fromParts.length, toParts.length);
       var samePartsLength = length;
       for (var i = 0; i < length; i++) {
         if (fromParts[i] != toParts[i]) {
@@ -454,21 +467,21 @@ _PathExports _factory(){
           break;
         }
       }
-  
+
       var outputParts = [];
       for (var i = samePartsLength; i < fromParts.length; i++) {
         outputParts.add('..');
       }
-  
+
       outputParts = concat([outputParts, slice(toParts, samePartsLength)]);
-  
+
       return outputParts.join('/');
     };
-  
+
     exports.sep = '/';
     exports.delimiter = ':';
   }
-  return exports; 
+  return exports;
 }
 
 String dirname(String path) {
@@ -489,26 +502,27 @@ String dirname(String path) {
   return root + dir;
 }
 
-
 String basename(String path, [String ext]) {
   var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?  
+  // TODO: make this comparison case-insensitive on windows?
   if (ext != null && f.endsWith(ext)) {
     f = f.substring(0, f.length - ext.length);
   }
   return f;
 }
 
-
 String extname(String path) {
   return splitPath(path)[3];
 }
 
-
-void exists(String path, void callback(bool)) {
-  File.isFile(path).then(callback);
+void exists(String path, void Function(bool) callback) {
+  FileSystemEntity.isFile(path).then(callback);
 }
 
-bool existsSync (String path) {
-  return File.isFileSync(path);
+bool existsSync(String path) {
+  return FileSystemEntity.isFileSync(path);
+}
+
+void main() {
+  print(Directory.current.absolute);
 }
