@@ -119,7 +119,7 @@ dynamic reduceRight(List list,
 
 /// Strings
 
-String charAt(String str, int atPos) => str.substring(atPos, 1);
+String charAt(String str, int atPos) => str.substring(atPos, atPos+1);
 
 int charCodeAt(String str, int atPos) => str.codeUnitAt(atPos);
 
